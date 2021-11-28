@@ -173,7 +173,7 @@ GetDateiname(Kilometrierung kilometrierung)
 {
   snprintf(g_outDatei,
            sizeof(g_outDatei) / sizeof(g_outDatei[0]),
-           "%s\\Hekto_DR_%d_%d.ls3",
+           "%s\\Hekto_DR_Mast_beids_%d_%d.ls3",
            g_zielverzeichnis,
            std::abs(kilometrierung.km),
            std::abs(kilometrierung.hm));
@@ -209,6 +209,10 @@ Erzeugen(float wert_m, uint8_t modus, const char** datei)
   const auto km_basis = Kilometrierung::fromMeter(wert_m);
 
   auto standort = static_cast<Standort>(modus);
+  if (standort != Standort::kEigenerStandort) {
+    return 0;
+  }
+
   *datei = GetDateiname(km_basis) + g_zusi_datenpfad_laenge;
   if (!CreateDirectoryWithParents(g_zielverzeichnis)) {
     return 0;
