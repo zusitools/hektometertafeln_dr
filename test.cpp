@@ -13,11 +13,13 @@ main(int argc, char** argv)
   std::cout << Bezeichnung() << '\n';
   std::cout << AbstandTafeln() << '\n';
 
-  const char* datei;
-  std::cout << Erzeugen(138500, 1, &datei) << '\n';
-  std::cout << datei << '\n';
-  std::cout << Erzeugen(40700, 1, &datei) << '\n';
-  std::cout << datei << '\n';
-  std::cout << Erzeugen(2900, 1, &datei) << '\n';
-  std::cout << datei << '\n';
+  auto erzeugen = [](int meter) {
+    const char* datei;
+    int result = Erzeugen(meter, 1, &datei);
+    std::cout << "Ergebnis: " << result << ", Erzeugte Datei: \"" << datei
+              << "\"\n";
+  };
+  erzeugen(138500);
+  erzeugen(40700);
+  erzeugen(2900);
 }
