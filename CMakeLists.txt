@@ -39,6 +39,9 @@ set_source_files_properties(version.rc PROPERTIES LANGUAGE RC)
 
 add_library(hektometertafeln_DR SHARED ${SOURCES})
 set_target_properties(hektometertafeln_DR PROPERTIES PREFIX "" LINKER_LANGUAGE C)
+if (WIN32 AND (CMAKE_SIZEOF_VOID_P EQUAL 8))
+  set_target_properties(hektometertafeln_DR PROPERTIES SUFFIX ".64.dll")
+endif()
 target_include_directories(hektometertafeln_DR PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(hektometertafeln_DR PRIVATE Boost::boost)
 

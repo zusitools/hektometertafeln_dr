@@ -125,7 +125,7 @@ Init(const char* zielverzeichnis)
 DLL_EXPORT const char*
 dllVersion()
 {
-  return "0.0.2";
+  return "0.0.3";
 }
 
 DLL_EXPORT const char*
