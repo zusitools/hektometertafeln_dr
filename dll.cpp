@@ -31,11 +31,9 @@ Init(const char* zielverzeichnis)
 {
   HKEY key;
   g_zusi_datenpfad_laenge = MAX_PATH;
-  if (!SUCCEEDED(RegOpenKeyEx(HKEY_LOCAL_MACHINE,
-                              "Software\\Zusi3",
-                              0,
-                              KEY_READ | KEY_WOW64_32KEY,
-                              &key))) {
+  if (!SUCCEEDED(RegOpenKeyEx(
+        HKEY_LOCAL_MACHINE, "Software\\Zusi3", 0, KEY_READ, &key))) {
+    fprintf(stderr, "failed at %s:%d\n", __FILE__, __LINE__);
     return 0;
   }
 
@@ -86,30 +84,39 @@ Init(const char* zielverzeichnis)
     if (PathFileExists(
           (std::string(buf.data()) + "\\_InstSetup\\usb.dat").c_str())) {
       if (!liesDatenverzeichnis("DatenVerzeichnis")) {
+        fprintf(stderr, "failed at %s:%d\n", __FILE__, __LINE__);
         return 0;
       }
     } else {
       if (!liesDatenverzeichnis("DatenVerzeichnisSteam")) {
+        fprintf(stderr, "failed at %s:%d\n", __FILE__, __LINE__);
         return 0;
       }
     }
   } else if (hatDatenverzeichnisRegulaer) {
     if (!liesDatenverzeichnis("DatenVerzeichnis")) {
+      fprintf(stderr, "failed at %s:%d\n", __FILE__, __LINE__);
       return 0;
     }
   } else if (hatDatenverzeichnisSteam) {
     if (!liesDatenverzeichnis("DatenVerzeichnisSteam")) {
+      fprintf(stderr, "failed at %s:%d\n", __FILE__, __LINE__);
       return 0;
     }
   } else {
+    fprintf(stderr, "failed at %s:%d\n", __FILE__, __LINE__);
     return 0;
   }
 
+  fprintf(stderr, "Zielverzeichnis: %s\n", g_zielverzeichnis);
+
   if (!PathAppend(g_zielverzeichnis, zielverzeichnis)) {
+    fprintf(stderr, "failed at %s:%d\n", __FILE__, __LINE__);
     return 0;
   }
 
   if (!PathAppend(g_zielverzeichnis, "Hektometertafeln")) {
+    fprintf(stderr, "failed at %s:%d\n", __FILE__, __LINE__);
     return 0;
   }
 
@@ -125,7 +132,7 @@ Init(const char* zielverzeichnis)
 DLL_EXPORT const char*
 dllVersion()
 {
-  return "0.0.3";
+  return "0.0.4";
 }
 
 DLL_EXPORT const char*
@@ -210,11 +217,13 @@ Erzeugen(float wert_m, uint8_t modus, const char** datei)
 
   auto standort = static_cast<Standort>(modus);
   if (standort != Standort::kEigenerStandort) {
+    fprintf(stderr, "failed at %s:%d\n", __FILE__, __LINE__);
     return 0;
   }
 
   *datei = GetDateiname(km_basis) + g_zusi_datenpfad_laenge;
   if (!CreateDirectoryWithParents(g_zielverzeichnis)) {
+    fprintf(stderr, "failed at %s:%d\n", __FILE__, __LINE__);
     return 0;
   }
 

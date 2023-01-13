@@ -1,12 +1,15 @@
 // Copyright 2021 Zusitools
 
-#include <iostream>
-
 #include "dll.hpp"
+
+#include <cassert>
+#include <iostream>
 
 int
 main(int argc, char** argv)
 {
+  assert(argc > 1);
+
   std::cout << Init(argv[1]) << '\n';
   std::cout << dllVersion() << '\n';
   std::cout << Autor() << '\n';
@@ -15,9 +18,11 @@ main(int argc, char** argv)
 
   auto erzeugen = [](int meter) {
     const char* datei;
-    int result = Erzeugen(meter, 1, &datei);
-    std::cout << "Ergebnis: " << result << ", Erzeugte Datei: \"" << datei
-              << "\"\n";
+    int result = Erzeugen(meter, 0, &datei);
+    std::cout << "Ergebnis: " << result << '\n';
+    if (datei != nullptr) {
+      std::cout << "Erzeugte Datei: \"" << datei << "\"\n";
+    }
   };
   erzeugen(138500);
   erzeugen(40700);

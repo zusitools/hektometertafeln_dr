@@ -3,6 +3,8 @@ project(hektometertafeln)
 
 set(CMAKE_CXX_STANDARD 20)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffile-prefix-map=${CMAKE_SOURCE_DIR}=CMAKE_SOURCE_DIR")
+
 find_program(IWYU_PATH NAMES include-what-you-use)
 if (IWYU_PATH)
   set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE ${IWYU_PATH})
