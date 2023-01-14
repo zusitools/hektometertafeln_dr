@@ -20,12 +20,6 @@ char g_zielverzeichnis[MAX_PATH]; // wird von Zusi beim Initialisieren gesetzt;
                                   // ohne abschliessenden Slash/Backslash
 char g_outDatei[MAX_PATH];        // zwecks Rueckgabe an Zusi
 
-enum class Standort : std::uint8_t
-{
-  kEigenerStandort = 0,
-  kMontageAmAnkerpunkt = 1,
-};
-
 DLL_EXPORT uint32_t
 Init(const char* zielverzeichnis)
 {
@@ -144,13 +138,21 @@ Autor()
 DLL_EXPORT const char*
 Bezeichnung()
 {
+#ifdef LGV
+  return "Borne kilometrique LGV";
+#else
   return "Hektometertafeln (DR)";
+#endif
 }
 
 DLL_EXPORT float
 AbstandTafeln()
 {
+#ifdef LGV
+  return 1000.0;
+#else
   return 200.0;
+#endif
 }
 
 DLL_EXPORT float
@@ -176,14 +178,27 @@ Config(HWND appHandle)
 }
 
 const char*
-GetDateiname(Kilometrierung kilometrierung)
+GetDateiname(
+#ifdef LGV
+  Standort standort,
+#endif
+  Kilometrierung kilometrierung)
 {
+#ifdef LGV
+  snprintf(g_outDatei,
+           sizeof(g_outDatei) / sizeof(g_outDatei[0]),
+           "%s\\Borne_%skm_%d.ls3",
+           g_zielverzeichnis,
+           standort == Standort::kEigenerStandort ? "" : "p_",
+           std::abs(kilometrierung.km));
+#else
   snprintf(g_outDatei,
            sizeof(g_outDatei) / sizeof(g_outDatei[0]),
            "%s\\Hekto_DR_Mast_beids_%d_%d.ls3",
            g_zielverzeichnis,
            std::abs(kilometrierung.km),
            std::abs(kilometrierung.hm));
+#endif
   return g_outDatei;
 }
 
@@ -215,13 +230,20 @@ Erzeugen(float wert_m, uint8_t modus, const char** datei)
 
   const auto km_basis = Kilometrierung::fromMeter(wert_m);
 
-  auto standort = static_cast<Standort>(modus);
+  const auto standort = static_cast<Standort>(modus);
+#ifndef LGV
   if (standort != Standort::kEigenerStandort) {
     fprintf(stderr, "failed at %s:%d\n", __FILE__, __LINE__);
     return 0;
   }
+#endif
 
-  *datei = GetDateiname(km_basis) + g_zusi_datenpfad_laenge;
+  *datei = GetDateiname(
+#ifdef LGV
+             standort,
+#endif
+             km_basis) +
+           g_zusi_datenpfad_laenge;
   if (!CreateDirectoryWithParents(g_zielverzeichnis)) {
     fprintf(stderr, "failed at %s:%d\n", __FILE__, __LINE__);
     return 0;
@@ -229,7 +251,11 @@ Erzeugen(float wert_m, uint8_t modus, const char** datei)
 
   FILE* fd = fopen(g_outDatei, "w");
   assert(fd != nullptr);
-  HektoBuilder::Build(fd, km_basis);
+  HektoBuilder::Build(fd,
+#ifdef LGV
+                      standort,
+#endif
+                      km_basis);
   fclose(fd);
 
   return 1;

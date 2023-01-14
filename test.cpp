@@ -16,15 +16,21 @@ main(int argc, char** argv)
   std::cout << Bezeichnung() << '\n';
   std::cout << AbstandTafeln() << '\n';
 
-  auto erzeugen = [](int meter) {
+  auto erzeugen = [](int meter, [[maybe_unused]] uint8_t standort) {
     const char* datei;
-    int result = Erzeugen(meter, 0, &datei);
+    int result = Erzeugen(meter,
+#ifdef LGV
+                          standort,
+#else
+                          0,
+#endif
+                          &datei);
     std::cout << "Ergebnis: " << result << '\n';
     if (datei != nullptr) {
       std::cout << "Erzeugte Datei: \"" << datei << "\"\n";
     }
   };
-  erzeugen(138500);
-  erzeugen(40700);
-  erzeugen(2900);
+  erzeugen(138400, 0);
+  erzeugen(40700, 1);
+  erzeugen(2900, 0);
 }

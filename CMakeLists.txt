@@ -28,34 +28,54 @@ generate_template(${CMAKE_CURRENT_SOURCE_DIR}/assets/hekto-dr-1.ls3 1 ${CMAKE_CU
 generate_template(${CMAKE_CURRENT_SOURCE_DIR}/assets/hekto-dr-2.ls3 2 ${CMAKE_CURRENT_BINARY_DIR}/hekto-dr-2.cpp)
 generate_template(${CMAKE_CURRENT_SOURCE_DIR}/assets/hekto-dr-3.ls3 3 ${CMAKE_CURRENT_BINARY_DIR}/hekto-dr-3.cpp)
 
-set (SOURCES
+generate_template(${CMAKE_CURRENT_SOURCE_DIR}/assets-lgv/hekto-lgv-1.ls3 1 ${CMAKE_CURRENT_BINARY_DIR}/hekto-lgv-1.cpp)
+generate_template(${CMAKE_CURRENT_SOURCE_DIR}/assets-lgv/hekto-lgv-2.ls3 2 ${CMAKE_CURRENT_BINARY_DIR}/hekto-lgv-2.cpp)
+generate_template(${CMAKE_CURRENT_SOURCE_DIR}/assets-lgv/hekto-lgv-3.ls3 3 ${CMAKE_CURRENT_BINARY_DIR}/hekto-lgv-3.cpp)
+generate_template(${CMAKE_CURRENT_SOURCE_DIR}/assets-lgv/hekto-lgv-mast-1.ls3 _mast1 ${CMAKE_CURRENT_BINARY_DIR}/hekto-lgv-mast-1.cpp)
+generate_template(${CMAKE_CURRENT_SOURCE_DIR}/assets-lgv/hekto-lgv-mast-2.ls3 _mast2 ${CMAKE_CURRENT_BINARY_DIR}/hekto-lgv-mast-2.cpp)
+generate_template(${CMAKE_CURRENT_SOURCE_DIR}/assets-lgv/hekto-lgv-mast-3.ls3 _mast3 ${CMAKE_CURRENT_BINARY_DIR}/hekto-lgv-mast-3.cpp)
+
+add_library(hektometertafeln_DR SHARED
   hekto_builder.cpp
   dll.cpp
   version.rc
   ${CMAKE_CURRENT_BINARY_DIR}/hekto-dr-1.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/hekto-dr-2.cpp
-  ${CMAKE_CURRENT_BINARY_DIR}/hekto-dr-3.cpp
-)
+  ${CMAKE_CURRENT_BINARY_DIR}/hekto-dr-3.cpp)
+add_library(Borne_kilometrique_LGV SHARED
+  hekto_builder.cpp
+  dll.cpp
+  version.rc
+  ${CMAKE_CURRENT_BINARY_DIR}/hekto-lgv-1.cpp
+  ${CMAKE_CURRENT_BINARY_DIR}/hekto-lgv-2.cpp
+  ${CMAKE_CURRENT_BINARY_DIR}/hekto-lgv-3.cpp
+  ${CMAKE_CURRENT_BINARY_DIR}/hekto-lgv-mast-1.cpp
+  ${CMAKE_CURRENT_BINARY_DIR}/hekto-lgv-mast-2.cpp
+  ${CMAKE_CURRENT_BINARY_DIR}/hekto-lgv-mast-3.cpp)
 
 set_source_files_properties(version.rc PROPERTIES LANGUAGE RC)
+target_compile_definitions(Borne_kilometrique_LGV PRIVATE -DLGV)
 
-add_library(hektometertafeln_DR SHARED ${SOURCES})
-set_target_properties(hektometertafeln_DR PROPERTIES PREFIX "" LINKER_LANGUAGE C)
-if (WIN32 AND (CMAKE_SIZEOF_VOID_P EQUAL 8))
-  set_target_properties(hektometertafeln_DR PROPERTIES SUFFIX ".64.dll")
-endif()
-target_include_directories(hektometertafeln_DR PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(hektometertafeln_DR PRIVATE Boost::boost)
+foreach (_name hektometertafeln_DR Borne_kilometrique_LGV)
+  set_target_properties(${_name} PROPERTIES PREFIX "" LINKER_LANGUAGE C)
+  if (WIN32 AND (CMAKE_SIZEOF_VOID_P EQUAL 8))
+    set_target_properties(${_name} PROPERTIES SUFFIX ".64.dll")
+  endif()
+  target_include_directories(${_name} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+  target_link_libraries(${_name} PRIVATE Boost::boost)
 
-if (WIN32)
-  target_link_libraries(hektometertafeln_DR PUBLIC shlwapi)
-endif()
+  if (WIN32)
+    target_link_libraries(${_name} PUBLIC shlwapi)
+  endif()
 
-target_compile_definitions(hektometertafeln_DR PRIVATE -DDLL_EXPORTS)
-if(MINGW)
-  target_link_libraries(hektometertafeln_DR PRIVATE -Wl,--add-stdcall-alias)
-endif()
-install(TARGETS hektometertafeln_DR DESTINATION _InstSetup/lib/milepost)
+  target_compile_definitions(${_name} PRIVATE -DDLL_EXPORTS)
+  if(MINGW)
+    target_link_libraries(${_name} PRIVATE -Wl,--add-stdcall-alias)
+  endif()
+  install(TARGETS ${_name} DESTINATION _InstSetup/lib/milepost)
 
-add_executable(hektometertafeln_DR_test test.cpp)
-target_link_libraries(hektometertafeln_DR_test PRIVATE hektometertafeln_DR)
+  add_executable(${_name}_test test.cpp)
+  target_link_libraries(${_name}_test PRIVATE ${_name})
+endforeach()
+
+target_compile_definitions(Borne_kilometrique_LGV_test PRIVATE -DLGV)

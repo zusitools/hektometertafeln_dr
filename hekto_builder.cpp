@@ -14,7 +14,11 @@
 namespace HektoBuilder {
 
 void
-Build(FILE* fd, Kilometrierung kilometrierung)
+Build(FILE* fd,
+#ifdef LGV
+      Standort standort,
+#endif
+      Kilometrierung kilometrierung)
 {
   const bool ist_negativ = kilometrierung.istNegativ();
   const int zahl_oben = std::abs(kilometrierung.km);
@@ -60,20 +64,37 @@ Build(FILE* fd, Kilometrierung kilometrierung)
   };
 
   auto contents = [&]() {
+#ifndef LGV
     set_ziffer("hm", ziffer_unten);
+#endif
 
     set_ziffer("einer", zahl_oben % 10);
     if (zahl_oben < 10) {
+#ifdef LGV
+      return standort == Standort::kEigenerStandort ? templates::template1
+                                                    : templates::template_mast1;
+#else
       return templates::template1;
+#endif
     }
 
     set_ziffer("zehner", (zahl_oben / 10) % 10);
     if (zahl_oben < 100) {
+#ifdef LGV
+      return standort == Standort::kEigenerStandort ? templates::template2
+                                                    : templates::template_mast2;
+#else
       return templates::template2;
+#endif
     }
 
     set_ziffer("hunderter", (zahl_oben / 100) % 10);
+#ifdef LGV
+    return standort == Standort::kEigenerStandort ? templates::template3
+                                                  : templates::template_mast3;
+#else
     return templates::template3;
+#endif
   }();
 
   for (const auto& [key, value] : replacements) {
